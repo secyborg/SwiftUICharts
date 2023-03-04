@@ -117,3 +117,7 @@ extension View {
     }
     #endif
 }
+
+enum Test {
+    case value1, value2
+}

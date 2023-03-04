@@ -15,6 +15,7 @@ internal struct MouseOverlay<T>: ViewModifier where T: CTChartData {
     @ObservedObject private var chartData: T
     let minDistance: CGFloat
     @State private var mouseLocation: CGPoint = .zero
+    @State private var isHovering = false
     
     internal init(
         chartData: T,
@@ -42,9 +43,15 @@ internal struct MouseOverlay<T>: ViewModifier where T: CTChartData {
                                                           chartSize: geo.frame(in: .local))
                         }
 
-                        MouseTrackerRepresentable(mouseLocation: $mouseLocation)
+                        MouseTrackerRepresentable(mouseLocation: $mouseLocation, isHovering: $isHovering)
                             .onChange(of: mouseLocation) { newLocation in
                                 chartData.setTouchInteraction(touchLocation: newLocation, chartSize: geo.frame(in: .local))
+                            }
+                            .onHover { hovering in
+                                if !hovering {
+                                    chartData.infoView.isTouchCurrent = false
+                                    chartData.infoView.touchOverlayInfo = []
+                                }
                             }
 //                            .gesture(
 //                                DragGesture(minimumDistance: minDistance, coordinateSpace: .local)
@@ -85,13 +92,15 @@ extension View {
 class MouseTrackerView: NSView {
     // A binding property that holds the mouse location
     var mouseLocation: Binding<CGPoint>
+    var isHovering: Binding<Bool>
     
     // A designated initializer that takes a binding property as an argument
-    init(mouseLocation: Binding<CGPoint>) {
+    init(mouseLocation: Binding<CGPoint>, isHovering: Binding<Bool>) {
         self.mouseLocation = mouseLocation
+        self.isHovering = isHovering
         super.init(frame: .zero)
         // Enable mouse tracking for this view
-        self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.mouseMoved, .activeInKeyWindow], owner: self, userInfo: nil))
+        self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.mouseMoved], owner: self, userInfo: nil))
     }
     
     // A required initializer for NSView subclasses
@@ -106,14 +115,22 @@ class MouseTrackerView: NSView {
         let location = self.convert(event.locationInWindow, from: nil)
         // Update the binding property with the new location
         self.mouseLocation.wrappedValue = location
+//        if !self.isHovering.wrappedValue {
+//            self.isHovering.wrappedValue = true
+//        }
     }
+    
+//    override func mouseExited(with event: NSEvent) {
+//        super.mouseExited(with: event)
+//        self.isHovering.wrappedValue = false
+//    }
     
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         // Update the tracking area with the current bounds of the view
         if let trackingArea = self.trackingAreas.first {
             self.removeTrackingArea(trackingArea)
-            self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.mouseMoved, .activeInKeyWindow], owner: self, userInfo: nil))
+            self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.mouseMoved], owner: self, userInfo: nil))
         }
     }
 }
@@ -122,10 +139,11 @@ class MouseTrackerView: NSView {
 struct MouseTrackerRepresentable: NSViewRepresentable {
     // A binding property that holds the mouse location
     @Binding var mouseLocation: CGPoint
+    @Binding var isHovering: Bool
     
     // A method that creates an instance of MouseTrackerView with the given context
     func makeNSView(context: Context) -> MouseTrackerView {
-        return MouseTrackerView(mouseLocation: $mouseLocation)
+        return MouseTrackerView(mouseLocation: $mouseLocation, isHovering: $isHovering)
     }
     
     // A method that updates an existing instance of MouseTrackerView with the given context
