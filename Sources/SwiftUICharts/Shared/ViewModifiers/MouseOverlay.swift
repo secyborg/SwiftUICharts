@@ -53,17 +53,6 @@ internal struct MouseOverlay<T>: ViewModifier where T: CTChartData {
                                     chartData.infoView.touchOverlayInfo = []
                                 }
                             }
-//                            .gesture(
-//                                DragGesture(minimumDistance: minDistance, coordinateSpace: .local)
-//                                    .onChanged { (value) in
-//                                        chartData.setTouchInteraction(touchLocation: value.location,
-//                                                                      chartSize: geo.frame(in: .local))
-//                                    }
-//                                    .onEnded { _ in
-//                                        chartData.infoView.isTouchCurrent = false
-//                                        chartData.infoView.touchOverlayInfo = []
-//                                    }
-//                            )
                     }
                 }
             } else { content }
@@ -100,7 +89,7 @@ class MouseTrackerView: NSView {
         self.isHovering = isHovering
         super.init(frame: .zero)
         // Enable mouse tracking for this view
-        self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.mouseMoved], owner: self, userInfo: nil))
+        self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.mouseMoved, .activeInKeyWindow], owner: self, userInfo: nil))
     }
     
     // A required initializer for NSView subclasses
@@ -130,7 +119,7 @@ class MouseTrackerView: NSView {
         // Update the tracking area with the current bounds of the view
         if let trackingArea = self.trackingAreas.first {
             self.removeTrackingArea(trackingArea)
-            self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.mouseMoved], owner: self, userInfo: nil))
+            self.addTrackingArea(NSTrackingArea(rect: self.bounds, options: [.mouseMoved, .activeInKeyWindow], owner: self, userInfo: nil))
         }
     }
 }
