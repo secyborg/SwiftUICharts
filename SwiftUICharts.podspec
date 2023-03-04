@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/willdale/SwiftUICharts'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'willdale' => 'www.linkedin.com/in/willdale-dev' }
-  s.source           = { :git => 'https://github.com/willdale/SwiftUICharts.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/secyborg/SwiftUICharts.git', :tag => s.version.to_s }
   s.ios.deployment_target = '14.0'
   s.tvos.deployment_target = '14.0'
   s.watchos.deployment_target = '7.0'
